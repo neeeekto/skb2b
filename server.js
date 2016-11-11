@@ -10,48 +10,36 @@ app.use((req, res, next) => {
 })
 
 app.get('/', (req, res) =>{
-    
-
-    debugger;
-    console.log('Input new request ');
-    let inputName = req.query.fullname;
-    
+    let inputName = req.query.fullname.trim();
+    let error = false;
     if(!inputName || /([0-9_\/])/g.test(inputName)) {
-        res.send('Invalid fullname');
-        console.log(inputName, '\n--------------------------------------');
-        return;
+        error = true;
     }
 
-    let arrayName = inputName.split(' ');
-    let validNameArray = [];
-
-    arrayName.forEach((el)=>{
-        if(el.length) validNameArray.push(el);
-    });
-
-    if(validNameArray.length>3 || validNameArray.length == 0){
-        res.send('Invalid fullname');
-        console.log(inputName, '\n--------------------------------------');
-        return;
+    let validNameArray = inputName.split(/\s* \s*/);
+    if(validNameArray.length>3 || !validNameArray.length){
+        error = true;
     } 
 
-    let result1 = '', result2 = '', flagFull = true ;
-
-    for(let i = validNameArray.length-1; i>=0; i--){
-        if(flagFull){
-            let tempName = validNameArray[i].toLowerCase();
-            result1 = tempName[0].toUpperCase()+tempName.slice(1);
-            flagFull = false;
-        } 
-        else{
-            result2 = ' ' + validNameArray[i][0].toUpperCase() + '.' + result2;
-        }     
+    if(!error){
+        let surname = '', initials = '', flagFirst = true ;
+        for(let i = validNameArray.length-1; i>=0; i--){
+            if(flagFirst){
+                let tempName = validNameArray[i].toLowerCase();
+                surname = tempName[0].toUpperCase()+tempName.slice(1);
+                flagFirst = false;
+            } 
+            else{
+                initials = ' ' + validNameArray[i][0].toUpperCase() + '.' + initials;
+            }     
+        }
+        res.send(surname+initials);
     }
-    console.log('result:\n ', result1+result2);
-    console.log(inputName, '\n--------------------------------------');
-    res.send(result1+result2);
-
+    else{
+        res.send('Invalid fullname');
+    }
 })
+
 
 app.listen(3000, ()=>{
     console.log('Success! 3000 port run');
